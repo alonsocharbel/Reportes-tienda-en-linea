@@ -363,6 +363,59 @@ export const generateReturnsData = () => {
   });
 };
 
+// Generar nuevos clientes en el tiempo
+export const generateNewCustomersTimeline = (days = 30) => {
+  const data = [];
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = startOfDay(subDays(new Date(), i));
+    const newCustomers = randomInt(40, 120);
+    const totalOrders = randomInt(80, 200);
+    const percentOfOrders = (newCustomers / totalOrders) * 100;
+    
+    data.push({
+      date: format(date, 'yyyy-MM-dd'),
+      newCustomers,
+      percentOfOrders,
+    });
+  }
+  
+  return data;
+};
+
+// Generar segmentación de clientes (nuevos vs habituales)
+export const generateCustomerSegmentation = () => {
+  const totalOrders = 1250;
+  const newOrders = Math.round(totalOrders * randomFloat(0.60, 0.70));
+  const returningOrders = totalOrders - newOrders;
+  
+  return {
+    new: {
+      orders: newOrders,
+      gmv: newOrders * randomFloat(750, 950),
+      aov: randomFloat(750, 950),
+    },
+    returning: {
+      orders: returningOrders,
+      gmv: returningOrders * randomFloat(1200, 1500),
+      aov: randomFloat(1200, 1500),
+    },
+  };
+};
+
+// Generar conversiones desde búsqueda
+export const generateSearchConversions = () => {
+  const searchTerms = generateSearchTerms();
+  
+  return searchTerms.slice(0, 10).map(term => ({
+    term: term.term,
+    searches: term.searches,
+    conversions: Math.round(term.searches * randomFloat(0.05, 0.15)),
+    cr: randomFloat(5, 15),
+    gmv: Math.round(term.searches * randomFloat(800, 1500)),
+  }));
+};
+
 export default {
   generateTrafficData,
   generateConversionData,
@@ -378,4 +431,7 @@ export default {
   generateSalesData,
   generateCOGSData,
   generateReturnsData,
+  generateNewCustomersTimeline,
+  generateCustomerSegmentation,
+  generateSearchConversions,
 };

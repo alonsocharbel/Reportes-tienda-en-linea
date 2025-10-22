@@ -57,6 +57,12 @@ export const useMetrics = () => {
     const salesData = generators.generateSalesData(daysInRange);
     const cogsData = generators.generateCOGSData();
     const returnsData = generators.generateReturnsData();
+    const newCustomersTimeline = generators.generateNewCustomersTimeline(daysInRange);
+    const customerSegmentation = generators.generateCustomerSegmentation();
+    const searchConversions = generators.generateSearchConversions();
+    
+    // Calcular nuevos visitantes (70% de los usuarios totales)
+    const newVisitors = Math.round(totalUsers * 0.70);
     
     return {
       // Tráfico
@@ -99,6 +105,15 @@ export const useMetrics = () => {
       cogsData,
       returnsData,
       avgReturnRate: returnsData.reduce((sum, d) => sum + d.rate, 0) / returnsData.length,
+      
+      // Clientes
+      newVisitors,
+      newCustomersTimeline,
+      customerSegmentation,
+      
+      // Búsqueda con conversiones
+      searchConversions,
+      searchCR: searchConversions.length > 0 ? searchConversions.reduce((sum, s) => sum + s.cr, 0) / searchConversions.length : 0,
     };
   }, [dateRange, filters, daysInRange]);
 
