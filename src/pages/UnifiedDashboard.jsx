@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, MousePointerClick, ShoppingCart, TrendingUp, Eye, Zap, Package, DollarSign, TrendingDown } from 'lucide-react';
+import { Users, MousePointerClick, ShoppingCart, TrendingUp, Eye, Zap, Package, DollarSign, TrendingDown, Search, MapPin, UserCheck } from 'lucide-react';
 import MetricCard from '../components/common/MetricCard';
 import Chart from '../components/common/Chart';
 import DataTable from '../components/common/DataTable';
@@ -157,6 +157,77 @@ const UnifiedDashboard = () => {
     { key: 'reason', label: 'Razón Principal', sortable: false },
   ];
 
+  const stateColumns = [
+    { key: 'state', label: 'Estado', sortable: true },
+    { 
+      key: 'sessions', 
+      label: 'Sesiones', 
+      sortable: true, 
+      align: 'right',
+      formatter: (val) => formatNumber(val)
+    },
+    { 
+      key: 'percent', 
+      label: '% del Total', 
+      sortable: true, 
+      align: 'right',
+      formatter: (val) => formatPercent(val)
+    },
+    { 
+      key: 'cr', 
+      label: 'CR', 
+      sortable: true, 
+      align: 'right',
+      formatter: (val) => formatPercent(val)
+    },
+    { 
+      key: 'gmv', 
+      label: 'GMV', 
+      sortable: true, 
+      align: 'right',
+      formatter: (val) => formatCurrency(val, true)
+    },
+    { 
+      key: 'orders', 
+      label: 'Órdenes', 
+      sortable: true, 
+      align: 'right',
+      formatter: (val) => formatNumber(val)
+    },
+  ];
+
+  const searchConversionColumns = [
+    { key: 'term', label: 'Término', sortable: true },
+    { 
+      key: 'searches', 
+      label: 'Búsquedas', 
+      sortable: true, 
+      align: 'right',
+      formatter: (val) => formatNumber(val)
+    },
+    { 
+      key: 'conversions', 
+      label: 'Conversiones', 
+      sortable: true, 
+      align: 'right',
+      formatter: (val) => formatNumber(val)
+    },
+    { 
+      key: 'cr', 
+      label: 'CR', 
+      sortable: true, 
+      align: 'right',
+      formatter: (val) => formatPercent(val)
+    },
+    { 
+      key: 'gmv', 
+      label: 'GMV Generado', 
+      sortable: true, 
+      align: 'right',
+      formatter: (val) => formatCurrency(val, true)
+    },
+  ];}
+
   // Calcular totales financieros
   const totalGross = data.salesData.reduce((sum, d) => sum + d.gross, 0);
   const totalNet = data.salesData.reduce((sum, d) => sum + d.net, 0);
@@ -165,6 +236,25 @@ const UnifiedDashboard = () => {
   const totalCOGS = data.cogsData.reduce((sum, p) => sum + p.cogs, 0);
   const totalGrossProfit = totalNet - totalCOGS;
   const grossMargin = (totalGrossProfit / totalNet) * 100;
+
+  // Métrica #21: Conversión de Checkout
+  const checkoutConversion = (data.funnel.purchases / data.funnel.checkouts) * 100;
+
+  // Métrica #22: Conversiones desde Búsqueda
+  const searchConversions = data.searchConversions || [];
+  const totalSearchConversions = searchConversions.reduce((sum, s) => sum + s.conversions, 0);
+  const searchCR = data.searchCR || 0;
+  const searchVsGlobalMultiplier = searchCR / data.conversionRate;
+
+  // Métrica #23: Clientes Nuevos vs Habituales
+  const newCustomers = data.customerSegmentation?.new || { orders: 0, gmv: 0, aov: 0 };
+  const returningCustomers = data.customerSegmentation?.returning || { orders: 0, gmv: 0, aov: 0 };
+  const totalCustomerOrders = newCustomers.orders + returningCustomers.orders;
+  const newCustomerPercent = (newCustomers.orders / totalCustomerOrders) * 100;
+  const returningCustomerPercent = (returningCustomers.orders / totalCustomerOrders) * 100;
+  const aovDifference = returningCustomers.aov > newCustomers.aov 
+    ? ((returningCustomers.aov - newCustomers.aov) / newCustomers.aov) * 100
+    : ((newCustomers.aov - returningCustomers.aov) / returningCustomers.aov) * 100;
 
   return (
     <div className="space-y-8">
@@ -267,6 +357,16 @@ const UnifiedDashboard = () => {
             status={grossMargin >= 40 ? 'good' : grossMargin >= 20 ? 'warning' : 'error'}
           />
 
+          {/* Métrica #21: Conversión de Checkout */}
+          <MetricCard
+            title="Conversión de Checkout"
+            value={formatPercent(checkoutConversion)}
+            subtitle={`${formatNumber(data.funnel.purchases)} de ${formatNumber(data.funnel.checkouts)} checkouts`}
+            status={checkoutConversion >= 70 ? 'good' : checkoutConversion >= 50 ? 'warning' : 'error'}
+            icon={ShoppingCart}
+            tooltip="Porcentaje de sesiones que llegaron a checkout y completaron la compra. <50%: revisar costos/envío; 50-70%: probar simplificación; >70%: saludable"
+          />
+
           {/* Tasa de Devoluciones */}
           <MetricCard
             title="Tasa de Devoluciones"
@@ -362,17 +462,91 @@ const UnifiedDashboard = () => {
           <p className="text-sm text-gray-600">Evolución de sesiones y usuarios únicos</p>
         </div>
 
-        <div className="bg-white border border-gray-400 rounded-lg p-6">
-          <Chart
-            data={sessionsChartData}
-            type="line"
-            lines={[
-              { dataKey: 'sesiones', name: 'Sesiones', color: colors.brand.DEFAULT },
-              { dataKey: 'usuarios', name: 'Usuarios', color: colors.blueLink },
-            ]}
-            height={350}
-            formatter={(value) => formatNumber(value)}
-          />
+        {/* Métrica #3: % Nuevos vs Recurrentes (VISITANTES) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="lg:col-span-2 bg-white border border-gray-400 rounded-lg p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Métrica #19: Visitantes Únicos a lo Largo del Tiempo</h3>
+            <p className="text-sm text-gray-600 mb-4">Ratio de sesiones por visitante indica nivel de engagement</p>
+            <Chart
+              data={sessionsChartData}
+              type="line"
+              lines={[
+                { dataKey: 'sesiones', name: 'Sesiones', color: colors.brand.DEFAULT },
+                { dataKey: 'usuarios', name: 'Usuarios', color: colors.blueLink },
+              ]}
+              height={350}
+              formatter={(value) => formatNumber(value)}
+            />
+          </div>
+
+          <div className="bg-white border border-gray-400 rounded-lg p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Métrica #3: Nuevos vs Recurrentes</h3>
+            <p className="text-xs text-gray-600 mb-4">
+              <strong>Nota:</strong> Mide VISITANTES, no compradores. Para compradores ver Métrica 23.
+            </p>
+
+            {/* Dona visual */}
+            <div className="flex items-center justify-center mb-6">
+              <div className="relative w-48 h-48">
+                <svg viewBox="0 0 100 100" className="transform -rotate-90">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke={colors.brand[200]}
+                    strokeWidth="20"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke={colors.brand.DEFAULT}
+                    strokeWidth="20"
+                    strokeDasharray={`${(data.newVisitors / data.users) * 251.2} 251.2`}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {formatPercent((data.newVisitors / data.users) * 100)}
+                    </div>
+                    <div className="text-xs text-gray-600">Nuevos</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Detalles */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors.brand.DEFAULT }}></div>
+                  <span className="text-sm text-gray-700">Nuevos</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-bold text-gray-900">{formatNumber(data.newVisitors)}</div>
+                  <div className="text-xs text-gray-600">{formatPercent((data.newVisitors / data.users) * 100)}</div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors.brand[200] }}></div>
+                  <span className="text-sm text-gray-700">Recurrentes</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-bold text-gray-900">{formatNumber(data.users - data.newVisitors)}</div>
+                  <div className="text-xs text-gray-600">{formatPercent(((data.users - data.newVisitors) / data.users) * 100)}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-gray-50 rounded text-xs text-gray-600">
+              ℹ️ Si el visitante borró cookies o usa otro dispositivo, puede contabilizar como nuevo.
+            </div>
+          </div>
         </div>
       </section>
 
@@ -398,11 +572,52 @@ const UnifiedDashboard = () => {
           />
         </div>
 
-        <div className="bg-white border border-gray-400 rounded-lg p-6">
+        <div className="bg-white border border-gray-400 rounded-lg p-6 mb-6">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Top Términos Buscados</h3>
           <DataTable
             data={data.searchTerms}
             columns={searchColumns}
+            searchable={true}
+            exportable={true}
+          />
+        </div>
+
+        {/* Métrica #22: Conversiones desde Búsqueda */}
+        <div className="bg-white border border-gray-400 rounded-lg p-6">
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Métrica #22: Conversiones desde Búsqueda</h3>
+            <p className="text-sm text-gray-600">Compras realizadas en sesiones donde el usuario utilizó la búsqueda interna</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <MetricCard
+              title="Conversiones con Búsqueda"
+              value={formatNumber(totalSearchConversions)}
+              subtitle="En el período"
+              icon={Search}
+            />
+
+            <MetricCard
+              title="Search CR"
+              value={formatPercent(searchCR)}
+              subtitle="Tasa de conversión con búsqueda"
+              status={searchCR > data.conversionRate ? 'good' : 'warning'}
+              icon={TrendingUp}
+            />
+
+            <MetricCard
+              title="Search CR vs CR Global"
+              value={`×${searchVsGlobalMultiplier.toFixed(1)}`}
+              subtitle={`Sesiones con búsqueda convierten ${searchVsGlobalMultiplier.toFixed(1)}x más`}
+              status="good"
+              icon={TrendingUp}
+            />
+          </div>
+
+          <h4 className="text-md font-bold text-gray-900 mb-3">Top Términos por Conversión</h4>
+          <DataTable
+            data={searchConversions}
+            columns={searchConversionColumns}
             searchable={true}
             exportable={true}
           />
@@ -524,6 +739,58 @@ const UnifiedDashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Métrica #17: Sesiones por Estado (México) */}
+        <div className="bg-white border border-gray-400 rounded-lg p-6 mt-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Métrica #17: Sesiones por Estado (México)</h3>
+            <p className="text-sm text-gray-600">Distribución geográfica basada en geolocalización de IP</p>
+            <div className="inline-block mt-2 px-3 py-1 bg-yellow-50 border border-warning rounded-full text-xs text-gray-700">
+              ⚠️ Navegación basada en consentimiento
+            </div>
+          </div>
+
+          {/* Mapa de Calor Simplificado */}
+          <div className="mb-6 p-6 bg-gray-50 rounded-lg">
+            <div className="text-center text-gray-600 mb-4">
+              <MapPin className="inline-block w-12 h-12 mb-2" />
+              <p className="text-sm">Mapa de calor de México (Vista simplificada)</p>
+              <p className="text-xs text-gray-500 mt-1">Los estados con mayor tráfico se muestran en tonos más oscuros</p>
+            </div>
+
+            {/* Top 5 Estados visualizado */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {data.stateData && data.stateData.slice(0, 5).map((state, idx) => {
+                const maxSessions = data.stateData[0]?.sessions || 1;
+                const intensity = (state.sessions / maxSessions) * 100;
+                return (
+                  <div key={state.state} className="text-center">
+                    <div 
+                      className="w-full h-16 rounded-lg mb-2 flex items-center justify-center text-white font-bold"
+                      style={{ 
+                        backgroundColor: colors.brand.DEFAULT,
+                        opacity: intensity / 100
+                      }}
+                    >
+                      {state.state}
+                    </div>
+                    <div className="text-xs font-medium text-gray-900">{formatNumber(state.sessions)}</div>
+                    <div className="text-xs text-gray-600">sesiones</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Tabla completa */}
+          <h4 className="text-md font-bold text-gray-900 mb-3">Detalle por Estado</h4>
+          <DataTable
+            data={data.stateData || []}
+            columns={stateColumns}
+            searchable={true}
+            exportable={true}
+          />
+        </div>
       </section>
 
       {/* ========== FINANCIERO ========== */}
@@ -599,6 +866,141 @@ const UnifiedDashboard = () => {
                 <div className="text-gray-600">= Ventas Netas</div>
                 <div className="font-bold text-ok">{formatCurrency(totalNet)}</div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Métrica #20: Clientes Nuevos en el Tiempo */}
+        <div className="bg-white border border-gray-400 rounded-lg p-6 mb-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Métrica #20: Clientes Nuevos en el Tiempo</h3>
+            <p className="text-sm text-gray-600">Clientes que realizaron su primera compra en la tienda</p>
+          </div>
+
+          <Chart
+            data={data.newCustomersTimeline || []}
+            type="line"
+            lines={[
+              { dataKey: 'newCustomers', name: 'Clientes Nuevos', color: colors.ok },
+              { dataKey: 'percentOfOrders', name: '% de Órdenes de Nuevos', color: colors.warning, yAxisId: 'right' },
+            ]}
+            height={300}
+            formatter={(value, name) => 
+              name === '% de Órdenes de Nuevos' ? formatPercent(value) : formatNumber(value)
+            }
+          />
+
+          <div className="mt-4 p-3 bg-brand-50 rounded-lg text-sm">
+            <strong>💡 Nota:</strong> Esta métrica muestra nuevos clientes en el canal web. 
+            Clientes con compras previas en tiendas físicas cuentan como "nuevos" en web.
+          </div>
+        </div>
+
+        {/* Métrica #23: Clientes Nuevos vs Habituales (COMPRADORES) */}
+        <div className="bg-white border border-gray-400 rounded-lg p-6 mb-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Métrica #23: Clientes Nuevos vs Habituales</h3>
+            <p className="text-sm text-gray-600">
+              <strong>Nota:</strong> Basado en COMPRADORES (órdenes), no visitantes. Para visitantes ver Métrica 3.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Dona */}
+            <div className="flex items-center justify-center">
+              <div className="relative w-56 h-56">
+                <svg viewBox="0 0 100 100" className="transform -rotate-90">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke={colors.brand[200]}
+                    strokeWidth="20"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke={colors.ok}
+                    strokeWidth="20"
+                    strokeDasharray={`${(newCustomerPercent / 100) * 251.2} 251.2`}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-gray-900">
+                      {formatPercent(newCustomerPercent)}
+                    </div>
+                    <div className="text-sm text-gray-600">Nuevos</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Desglose */}
+            <div className="lg:col-span-2 space-y-4">
+              {/* Nuevos */}
+              <div className="p-4 bg-green-50 border border-ok rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <UserCheck className="w-5 h-5 text-ok" />
+                    <h4 className="font-bold text-gray-900">Clientes Nuevos</h4>
+                  </div>
+                  <div className="text-lg font-bold text-ok">{formatPercent(newCustomerPercent)}</div>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <div className="text-gray-600">Órdenes</div>
+                    <div className="font-bold text-gray-900">{formatNumber(newCustomers.orders)}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-600">GMV</div>
+                    <div className="font-bold text-gray-900">{formatCurrency(newCustomers.gmv, true)}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-600">AOV</div>
+                    <div className="font-bold text-gray-900">{formatCurrency(newCustomers.aov)}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Habituales */}
+              <div className="p-4 bg-blue-50 border border-blueLink rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <Users className="w-5 h-5 text-blueLink" />
+                    <h4 className="font-bold text-gray-900">Clientes Habituales</h4>
+                  </div>
+                  <div className="text-lg font-bold text-blueLink">{formatPercent(returningCustomerPercent)}</div>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <div className="text-gray-600">Órdenes</div>
+                    <div className="font-bold text-gray-900">{formatNumber(returningCustomers.orders)}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-600">GMV</div>
+                    <div className="font-bold text-gray-900">{formatCurrency(returningCustomers.gmv, true)}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-600">AOV</div>
+                    <div className="font-bold text-gray-900">{formatCurrency(returningCustomers.aov)}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Insight de AOV */}
+              {aovDifference > 25 && (
+                <div className="p-3 bg-yellow-50 border-l-4 border-warning rounded">
+                  <p className="text-sm text-gray-900">
+                    <strong>💡 Insight:</strong> Clientes {returningCustomers.aov > newCustomers.aov ? 'habituales' : 'nuevos'} gastan{' '}
+                    {formatPercent(aovDifference)} más por orden ({formatCurrency(Math.max(returningCustomers.aov, newCustomers.aov))} vs{' '}
+                    {formatCurrency(Math.min(returningCustomers.aov, newCustomers.aov))}).
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
