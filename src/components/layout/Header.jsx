@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Calendar, Filter, RefreshCw, X } from 'lucide-react';
 import { useDateRange } from '../../hooks/useDateRange';
 import { useFilters } from '../../hooks/useFilters';
-import colors from '../../styles/colors';
 
 const Header = () => {
   const { formatDateRange, presets, setPreset, dateRange } = useDateRange();
@@ -12,12 +11,12 @@ const Header = () => {
   const activeFiltersCount = getActiveFiltersCount();
 
   return (
-    <header className="bg-white border-b border-gray-400 px-6 py-4">
+    <header className="bg-white border-b border-gray-400 px-6 py-4 sticky top-0 z-50 shadow-sm">
       <div className="flex items-center justify-between">
         {/* Left: Title + Last Update */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            Dashboard de Reportería
+            Dashboard de Reportería T1 Tienda
           </h1>
           <p className="text-sm text-gray-600 mt-1">
             Actualizado hace 2 minutos • Última actualización: {new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })} hrs
@@ -40,27 +39,35 @@ const Header = () => {
 
             {/* Dropdown de rangos */}
             {showDatePicker && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-400 rounded-lg shadow-lg z-50">
-                <div className="p-2">
-                  <div className="text-xs font-semibold text-gray-600 px-2 py-1 mb-1">
-                    RANGOS RÁPIDOS
+              <>
+                {/* Overlay para cerrar */}
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowDatePicker(false)}
+                />
+                
+                <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-400 rounded-lg shadow-lg z-50">
+                  <div className="p-2">
+                    <div className="text-xs font-semibold text-gray-600 px-2 py-1 mb-1">
+                      RANGOS RÁPIDOS
+                    </div>
+                    {Object.entries(presets).map(([key, preset]) => (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          setPreset(key);
+                          setShowDatePicker(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-200 transition-colors ${
+                          dateRange.preset === key ? 'bg-brand-50 text-brand font-medium' : 'text-gray-900'
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
                   </div>
-                  {Object.entries(presets).map(([key, preset]) => (
-                    <button
-                      key={key}
-                      onClick={() => {
-                        setPreset(key);
-                        setShowDatePicker(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-200 transition-colors ${
-                        dateRange.preset === key ? 'bg-brand-50 text-brand font-medium' : 'text-gray-900'
-                      }`}
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
                 </div>
-              </div>
+              </>
             )}
           </div>
 
@@ -87,7 +94,7 @@ const Header = () => {
           )}
 
           {/* Refresh Button */}
-          <button className="p-2 text-gray-600 hover:text-brand transition-colors">
+          <button className="p-2 text-gray-600 hover:text-brand transition-colors" title="Actualizar datos">
             <RefreshCw size={18} />
           </button>
         </div>
@@ -100,7 +107,10 @@ const Header = () => {
             <div className="flex items-center space-x-1 px-3 py-1 bg-brand-50 text-brand text-xs rounded-full">
               <span>Dispositivo: {filters.device}</span>
               <button
-                onClick={() => useFilters().updateFilter('device', 'all')}
+                onClick={() => {
+                  const { updateFilter } = useFilters();
+                  updateFilter('device', 'all');
+                }}
                 className="ml-1 hover:text-brand-800"
               >
                 <X size={12} />
@@ -111,7 +121,10 @@ const Header = () => {
             <div className="flex items-center space-x-1 px-3 py-1 bg-brand-50 text-brand text-xs rounded-full">
               <span>Estado: {filters.state}</span>
               <button
-                onClick={() => useFilters().updateFilter('state', 'all')}
+                onClick={() => {
+                  const { updateFilter } = useFilters();
+                  updateFilter('state', 'all');
+                }}
                 className="ml-1 hover:text-brand-800"
               >
                 <X size={12} />

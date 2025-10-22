@@ -1,6 +1,6 @@
 # 📊 T1 Tienda - Dashboard de Reportería
 
-Dashboard de análisis y reportería para T1Tienda con 26 métricas clave para comercio electrónico.
+Dashboard unificado de análisis y reportería para T1Tienda con 22 métricas clave para comercio electrónico en una sola vista.
 
 ![T1 Tienda](https://img.shields.io/badge/React-18.2-blue)
 ![Vite](https://img.shields.io/badge/Vite-5.0-purple)
@@ -8,67 +8,102 @@ Dashboard de análisis y reportería para T1Tienda con 26 métricas clave para c
 
 ## 🚀 Características
 
-### Módulos Principales
+### Dashboard Unificado
+- **Vista única con scroll continuo**: Todas las métricas en una sola página
+- **Sin pestañas ni navegación lateral**: Experiencia fluida y directa
+- **22 métricas implementadas**: Todo lo necesario para análisis completo
 
-- **📈 Resumen Ejecutivo**: Vista general con KPIs principales
-- **👥 Tráfico & Conversión**: Análisis de sesiones, usuarios y embudo de conversión
-- **🛍️ Productos & Colecciones**: Rendimiento de productos, búsquedas y colecciones
-- **⚡ Performance Web**: Core Web Vitals (LCP, INP, CLS)
-- **💰 Métricas Financieras**: Ventas, COGS, márgenes y devoluciones
+### Módulos Integrados
 
-### 26 Métricas Implementadas
+#### 📈 Resumen Ejecutivo
+- Sesiones y usuarios únicos
+- Tasa de conversión global
+- Ventas netas y AOV
+- Usuarios activos en tiempo real
+- Ganancia bruta y margen
+- Tasa de devoluciones
 
-#### Bloque A: Tráfico & Conversión
+#### 🎯 Embudo de Conversión
+- Landing → PDP → ATC → Checkout → Purchase
+- Visualización clara de caídas
+- Insights automáticos de optimización
+
+#### 👥 Tráfico & Conversión
+- Evolución de sesiones y usuarios
+- Gráficas temporales interactivas
+- Análisis de tendencias
+
+#### 🔍 Búsqueda Interna
+- Top términos buscados
+- Tasa de búsquedas sin resultados
+- CTR a páginas de producto
+- Detección de gaps en catálogo
+
+#### 🛍️ Productos & Colecciones
+- Productos más vistos
+- Productos más agregados al carrito
+- ATC% por producto
+- Colecciones más visitadas
+- Análisis de rendimiento por SKU
+
+#### 📱 Segmentación
+- Distribución por dispositivo (Móvil/Desktop/Tablet)
+- Análisis por ubicación
+- Conversión por segmento
+
+#### 💰 Métricas Financieras
+- Ventas brutas vs netas
+- COGS y ganancia bruta por producto
+- Márgenes de rentabilidad
+- Tasa de devoluciones por producto
+- Alertas de márgenes críticos
+
+## 📊 22 Métricas Implementadas
+
+### Bloque A: Tráfico & Conversión
 1. Sesiones
 2. Usuarios Únicos
 3. % Nuevos vs Recurrentes (Visitantes)
 4. Tasa de Conversión (CR)
 5. Embudo de Conversión
 
-#### Bloque B: Búsqueda Interna
+### Bloque B: Búsqueda Interna
 6. Top Términos Buscados
 7. % Búsquedas Sin Resultados
 
-#### Bloque C: Productos & Colecciones
+### Bloque C: Productos & Colecciones
 8. Productos Más Vistos
 9. Productos Más Agregados al Carrito
 10. ATC% por Producto
 11. Colecciones Más Visitadas
 
-#### Bloque D: Performance Web
-12. LCP (Largest Contentful Paint)
-13. INP (Interaction to Next Paint)
-14. CLS (Cumulative Layout Shift)
-15. % URLs Good
+### Bloque D: Segmentación
+12. Sesiones por Dispositivo
+13. Sesiones por Estado (México)
 
-#### Bloque E: Segmentación
-16. Sesiones por Dispositivo
-17. Sesiones por Estado (México)
+### Bloque E: Live View
+14. Usuarios Activos Ahora
 
-#### Bloque F: Live View
-18. Usuarios Activos Ahora
+### Bloque F: Tendencias Temporales
+15. Visitantes Únicos a lo Largo del Tiempo
+16. Clientes Nuevos en el Tiempo
 
-#### Bloque G: Tendencias Temporales
-19. Visitantes Únicos a lo Largo del Tiempo
-20. Clientes Nuevos en el Tiempo
+### Bloque G: Conversión Específica
+17. Conversión de Checkout
+18. Conversiones desde Búsqueda
 
-#### Bloque H: Conversión Específica
-21. Conversión de Checkout
-22. Conversiones desde Búsqueda
+### Bloque H: Compradores
+19. Clientes Nuevos vs Habituales (Compradores)
 
-#### Bloque I: Compradores
-23. Clientes Nuevos vs Habituales (Compradores)
-
-#### Bloque J: Métricas Financieras
-24. Ventas Brutas vs Ventas Netas
-25. COGS y Ganancia Bruta
-26. Tasa de Devoluciones
+### Bloque I: Métricas Financieras
+20. Ventas Brutas vs Ventas Netas
+21. COGS y Ganancia Bruta
+22. Tasa de Devoluciones
 
 ## 🛠️ Stack Tecnológico
 
 - **Framework**: React 18.2
 - **Build Tool**: Vite 5.0
-- **Routing**: React Router v6
 - **Estilos**: Tailwind CSS 3.4
 - **Gráficas**: Recharts 2.10
 - **Mapas**: D3.js + D3-geo
@@ -79,10 +114,10 @@ Dashboard de análisis y reportería para T1Tienda con 26 métricas clave para c
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/[tu-usuario]/reportes-tienda-en-linea.git
+git clone https://github.com/alonsocharbel/Reportes-tienda-en-linea.git
 
 # Instalar dependencias
-cd reportes-tienda-en-linea
+cd Reportes-tienda-en-linea
 npm install
 
 # Iniciar servidor de desarrollo
@@ -151,15 +186,73 @@ Completamente responsive con soporte para:
 - Tablet (768px - 1023px)
 - Mobile (320px - 767px)
 
-## 🌐 Deploy en Vercel
+## 🌐 Deploy
+
+### Vercel (Recomendado)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+
+```bash
+# Con Vercel CLI
+vercel --prod
+```
 
 El proyecto está optimizado para despliegue en Vercel:
 - Build automático con `npm run build`
 - Optimización de assets
 - Caché inteligente
 - Edge Network
+
+### URL de Producción
+**https://reportes-tienda-en-linea.vercel.app**
+
+## 🔄 Workflow de Desarrollo
+
+```bash
+# 1. Hacer cambios en el código
+# 2. Guardar cambios en Git
+git add .
+git commit -m "✨ Descripción del cambio"
+git push
+
+# 3. Vercel despliega automáticamente
+```
+
+## 📄 Estructura del Proyecto
+
+```
+src/
+├── components/
+│   ├── common/          # Componentes reutilizables
+│   │   ├── Chart.jsx
+│   │   ├── DataTable.jsx
+│   │   └── MetricCard.jsx
+│   └── layout/          # Componentes de layout
+│       └── Header.jsx
+├── data/
+│   └── generators.js    # Generadores de datos simulados
+├── hooks/
+│   ├── useDateRange.jsx # Hook de rangos de fecha
+│   ├── useFilters.jsx   # Hook de filtros
+│   └── useMetrics.jsx   # Hook de métricas
+├── pages/
+│   └── UnifiedDashboard.jsx  # Dashboard unificado
+├── styles/
+│   └── colors.js        # Sistema de colores T1
+├── utils/
+│   └── formatters.js    # Utilidades de formato
+├── App.jsx              # Componente principal
+└── main.jsx             # Entry point
+```
+
+## 🎯 Mejoras Futuras
+
+- [ ] Integración con API real de T1Tienda
+- [ ] Exportación de reportes en PDF/Excel
+- [ ] Filtros avanzados por categoría y colección
+- [ ] Comparación de períodos personalizados
+- [ ] Alertas y notificaciones automáticas
+- [ ] Dashboard personalizable (drag & drop de widgets)
 
 ## 📄 Licencia
 
