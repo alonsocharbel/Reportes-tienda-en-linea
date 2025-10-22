@@ -226,7 +226,7 @@ const UnifiedDashboard = () => {
       align: 'right',
       formatter: (val) => formatCurrency(val, true)
     },
-  ];}
+  ];
 
   // Calcular totales financieros
   const totalGross = data.salesData.reduce((sum, d) => sum + d.gross, 0);
